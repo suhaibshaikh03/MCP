@@ -14,6 +14,4 @@ body = {
 }
 
 response = requests.post(url, headers=headers,json=body)
-for line in response.iter_lines():
-    if line:
-        print(line)
+print(response.text)
