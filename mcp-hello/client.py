@@ -4,7 +4,7 @@ url = "http://localhost:8000/mcp/"
 headers = {
     "Accept":"application/json, text/event-stream"
 }
-
+# method to get all tools list (tools/list)
 body = {
     "jsonrpc":"2.0",
     "method":"tools/list",
@@ -12,6 +12,22 @@ body = {
     "params":{}
     
 }
+# method to call any tool list (tools/call)
+body1 = {
+    "jsonrpc":"2.0",
+    "method":"tools/call",
+    "id":1,
+    "params":{
+        "name":"get_weather",
+        "arguments":{
+            "city":"New York"
+        }
+    }
+}
 
-response = requests.post(url, headers=headers,json=body)
-print(response.text)
+# response = requests.post(url, headers=headers,json=body)
+# print(response.text)
+
+call_tool = requests.post(url,headers=headers, json=body1)
+print(call_tool.text)
+# print(dir(call_tool))
