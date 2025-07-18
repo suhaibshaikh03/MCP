@@ -9,6 +9,10 @@ def search_online(query:str):
 async def get_weather(city:str):
     """Gets weather for a city"""
     return f"Weather in {city} is sunny"
+@mcp.tool()
+async def addition(num1:int,num2:int):
+    """Add two numbers"""
+    return num1+num2
 
 mcp_app = mcp.streamable_http_app()
 

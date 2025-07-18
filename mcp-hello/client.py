@@ -28,6 +28,23 @@ body1 = {
 # response = requests.post(url, headers=headers,json=body)
 # print(response.text)
 
-call_tool = requests.post(url,headers=headers, json=body1)
-print(call_tool.text)
+# call_tool = requests.post(url,headers=headers, json=body1)
+# print(call_tool.text)
 # print(dir(call_tool))
+
+#addition tool
+body2 = {
+    "jsonrpc":"2.0",
+    "method":"tools/call",
+    "id":1,
+    "params":{
+         "name":"addition",
+        "arguments":{
+            "num1":1,
+            "num2":2
+    }
+    
+}
+}
+response = requests.post(url, headers=headers,json=body2)
+print(response.text)
