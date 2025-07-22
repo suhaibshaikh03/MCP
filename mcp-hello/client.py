@@ -2,6 +2,7 @@ import requests
 url = "http://localhost:8000/mcp/"
 
 headers = {
+    "Content-Type":"application/json",
     "Accept":"application/json, text/event-stream"
 }
 # method to get all tools list (tools/list)
