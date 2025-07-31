@@ -4,6 +4,8 @@ from typing import Optional, Any
 from contextlib import AsyncExitStack
 from mcp import ClientSession, types
 from mcp.client.streamable_http import streamablehttp_client
+from pydantic import AnyUrl
+import json
 
 
 class MCPClient:
@@ -35,7 +37,7 @@ class MCPClient:
     async def list_tools(self) -> list[types.Tool]:
         # Core function: Retrieve the list of tools from the MCP server.
         # This follows the MCP client lifecycle (see MCP Lifecycle Specification: https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle)
-        result = await self.session().list_tools()
+        result : types.ListToolsResult = await self.session().list_tools()
         return result.tools
 
     async def call_tool(
@@ -53,9 +55,30 @@ class MCPClient:
         # TODO: Get a particular prompt defined by the MCP server
         return []
 
-    async def read_resource(self, uri: str) -> Any:
-        # TODO: Read a resource, parse the contents and return it
-        return []
+    async def read_resource(self, uri: str):
+        assert self._session , "Session not available"
+        url = AnyUrl(uri)
+        resource : types.ReadResourceResult = await self.session().read_resource(url)
+        # print(resource.__dict__)
+        result = resource.contents[0]
+        if isinstance(result,types.TextResourceContents):
+            if result.mimeType == "application/json":
+                try:
+                    return json.loads(result.text)
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding json: {e}")
+                    return result.text
+        return result.text
+        # return resource
+
+    async def list_resource_template(self) -> list[types.ResourceTemplate]:
+        result : types.ListResourceTemplatesResult = await self.session().list_resource_templates()
+        # print(result.__dict__)
+        return result.resourceTemplates
+
+    async def list_resources(self) -> list[types.Resource]:
+        resources : types.ListResourcesResult = await self.session().list_resources()
+        return resources.resources
 
     async def cleanup(self):
         await self._exit_stack.aclose()
@@ -87,25 +110,44 @@ async def main():
     ) as _client:
         # Example usage:
         # Retrieve and print available tools to verify the client implementation.
-        tools = await _client.list_tools()
-        for tool in tools:
-            print(f"Tool Name: {tool.name}, Tool Description: {tool.description}")
+        # tools = await _client.list_tools()
+        # for tool in tools:
+        #     print(f"Tool Name: {tool.name}, Tool Description: {tool.description}")
 
             
-        # Call a tool to read a document
-        read_result = await _client.call_tool(
-            tool_name="read_doc", tool_input={"doc_id": "deposition.md"}
-        )
-        if read_result:
-            print(f"Document Content: {read_result.content}")   
+        # # Call a tool to read a document
+        # read_result = await _client.call_tool(
+        #     tool_name="read_doc", tool_input={"doc_id": "deposition.md"}
+        # )
+        # if read_result:
+        #     print(f"Document Content: {read_result.content}")   
 
-        # Call a tool to edit a document
-        edit_result = await _client.call_tool(
-            tool_name="edit_doc", tool_input={"doc_id": "deposition.md", "content": "Hi this is Suhaib"}
-        )
-        if edit_result:
-            print(f"Edit Result: {edit_result.content}")   
+        # # Call a tool to edit a document
+        # edit_result = await _client.call_tool(
+        #     tool_name="edit_doc", tool_input={"doc_id": "deposition.md", "content": "Hi this is Suhaib"}
+        # )
+        # if edit_result:
+        #     print(f"Edit Result: {edit_result.content}")   
 
+        # List resources
+        # resources = await _client.list_resources()
+        # print("resources",resources) # list
+        # for res in resources:
+        #     print(res)
+
+        # read_resource = await _client.read_resource("docs://documents")
+        # print("------read resource-----",read_resource)
+
+
+        # List resource template
+        template = await _client.list_resource_template()
+        # for t in template:
+        #     print(t)
+        
+        uri = template[0].uriTemplate.replace("{doc_id}","deposition.md")
+
+        read_doc = await _client.read_resource(uri)
+        print("------read doc-----",read_doc)
         
 
 if __name__ == "__main__":
