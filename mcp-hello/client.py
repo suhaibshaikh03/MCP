@@ -47,5 +47,5 @@ body2 = {
     
 }
 }
-response = requests.post(url, headers=headers,json=body2)
+response = requests.post(url, headers=headers,json=body1)
 print(response.text)

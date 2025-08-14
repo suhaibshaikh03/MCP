@@ -38,7 +38,7 @@ class MCPClient:
         # Core function: Retrieve the list of tools from the MCP server.
         # This follows the MCP client lifecycle (see MCP Lifecycle Specification: https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle)
         result : types.ListToolsResult = await self.session().list_tools()
-        return result.tools
+        return result.tools #meta, nextCursor, tools
 
     async def call_tool(
         self, tool_name: str, tool_input: dict
@@ -46,6 +46,8 @@ class MCPClient:
         # Core function: Execute a specific tool on the MCP server using its name and input parameters.
         # This call is part of the MCP lifecycle's Operation phase.
         return await self.session().call_tool(tool_name, tool_input)
+        # meta, content, structuredContent, isError
+        # content is  a list, each item in list conatins : type, text, annotations, meta
 
     async def list_prompts(self) -> list[types.Prompt]:
         # TODO: Return a list of prompts defined by the MCP server
@@ -111,7 +113,10 @@ async def main():
         # Example usage:
         # Retrieve and print available tools to verify the client implementation.
         # tools = await _client.list_tools()
+        # print(tools)
         # for tool in tools:
+        #     print(tool)
+        #     print("---------------------------")
         #     print(f"Tool Name: {tool.name}, Tool Description: {tool.description}")
 
             
@@ -121,7 +126,7 @@ async def main():
         # )
         # if read_result:
         #     print(f"Document Content: {read_result.content}")   
-
+        # print(read_result.content[0].text)
         # # Call a tool to edit a document
         # edit_result = await _client.call_tool(
         #     tool_name="edit_doc", tool_input={"doc_id": "deposition.md", "content": "Hi this is Suhaib"}
@@ -140,14 +145,14 @@ async def main():
 
 
         # List resource template
-        template = await _client.list_resource_template()
+        # template = await _client.list_resource_template()
         # for t in template:
         #     print(t)
         
-        uri = template[0].uriTemplate.replace("{doc_id}","deposition.md")
+        # uri = template[0].uriTemplate.replace("{doc_id}","deposition.md")
 
-        read_doc = await _client.read_resource(uri)
-        print("------read doc-----",read_doc)
+        # read_doc = await _client.read_resource(uri)
+        # print("------read doc-----",read_doc)
         
 
 if __name__ == "__main__":

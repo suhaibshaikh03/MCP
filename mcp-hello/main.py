@@ -1,8 +1,9 @@
 from mcp.server.fastmcp import FastMCP
 mcp = FastMCP(name="hello-mcp",stateless_http=True)
 
-@mcp.tool(name="online researcher",description="online search for a query")
+@mcp.tool(name="online researcher",description="online search" )
 def search_online(query:str):
+    """Searches online for a query"""
     return f"search online for {query}"
 
 @mcp.tool()
