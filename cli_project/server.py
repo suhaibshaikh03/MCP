@@ -31,7 +31,9 @@ def edit_doc(doc_id: str, content: str) -> str:
 # TODO: Write a prompt to summarize a doc
 
 @mcp.resource("docs://documents",
-mime_type="application/json"
+mime_type="application/json",
+name="list_docs",
+description="List all available documents"
 )
 def list_docs():
     """List all available documents"""
@@ -43,6 +45,12 @@ mime_type="application/json"
 def read_doc(doc_id: str):
     """Read a document by ID"""
     return docs.get(doc_id, "Document not found")
+    # if doc_name in docs:
+    #     return {"name": doc_name, "content": docs[doc_name]}
+    # else:
+    #     raise mcp.ResourceNotFound(f"Document {doc_id} not found.")
+
+    
 
 
 mcp_app = mcp.streamable_http_app()

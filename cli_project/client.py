@@ -61,7 +61,8 @@ class MCPClient:
         assert self._session , "Session not available"
         url = AnyUrl(uri)
         resource : types.ReadResourceResult = await self.session().read_resource(url)
-        # print(resource.__dict__)
+        #  meta, contents[list]->(uri, mimeType, text, meta,) 
+        #  print(resource.__dict__) # imp
         result = resource.contents[0]
         if isinstance(result,types.TextResourceContents):
             if result.mimeType == "application/json":
@@ -75,11 +76,14 @@ class MCPClient:
 
     async def list_resource_template(self) -> list[types.ResourceTemplate]:
         result : types.ListResourceTemplatesResult = await self.session().list_resource_templates()
-        # print(result.__dict__)
+        # print(result.__dict__) # meta, nextCursor, resourceTemplates[list] ->
+        # name, title, uriTemplate, description, mimeType,annotations,meta
         return result.resourceTemplates
 
     async def list_resources(self) -> list[types.Resource]:
         resources : types.ListResourcesResult = await self.session().list_resources()
+        # meta, nextCursor, resources[list]
+        #resouces[0] -> name, title, uri, description, mimeType, size, annotations,meta
         return resources.resources
 
     async def cleanup(self):
@@ -136,7 +140,8 @@ async def main():
 
         # List resources
         # resources = await _client.list_resources()
-        # print("resources",resources) # list
+        # print(resources.model_dump()) # list
+        # print(resources)
         # for res in resources:
         #     print(res)
 
@@ -145,9 +150,13 @@ async def main():
 
 
         # List resource template
-        # template = await _client.list_resource_template()
-        # for t in template:
+        template = await _client.list_resource_template()
+        # for t in template: # printing each one
         #     print(t)
+        # print(template) # list of ResourceTemplate
+        new_uri = template[0].uriTemplate.replace("{doc_id}","spec.txt")
+        template1 = await _client.read_resource(new_uri)
+        print(template1)
         
         # uri = template[0].uriTemplate.replace("{doc_id}","deposition.md")
 
