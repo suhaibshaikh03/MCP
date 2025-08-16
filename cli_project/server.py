@@ -1,4 +1,5 @@
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts import base
 
 mcp = FastMCP("DocumentMCP", stateless_http=True)
 
@@ -50,7 +51,12 @@ def read_doc(doc_id: str):
     # else:
     #     raise mcp.ResourceNotFound(f"Document {doc_id} not found.")
 
-    
+@mcp.prompt(name="greet",description="Greet a person",title="Hello Prompt")
+def hello_prompt(name:str) -> str:
+    """Hello prompt"""
+    user_message = f"Hello {name}!"
+    return [base.UserMessage(content=user_message), base.AssistantMessage(content="Hello, its nice to meetv you")]
+    return user_message
 
 
 mcp_app = mcp.streamable_http_app()

@@ -51,11 +51,15 @@ class MCPClient:
 
     async def list_prompts(self) -> list[types.Prompt]:
         # TODO: Return a list of prompts defined by the MCP server
-        return []
+        prompts : types.ListPromptsResult = await self.session().list_prompts()
+        # meta, nextCursor, prompts[list] -> name, title, description, annotations, meta
+        return prompts.prompts
 
     async def get_prompt(self, prompt_name, args: dict[str, str]):
         # TODO: Get a particular prompt defined by the MCP server
-        return []
+        prompt : types.GetPromptResult = await self.session().get_prompt(prompt_name, args)
+        # meta, description, messages[list] -> role, content
+        return prompt.messages
 
     async def read_resource(self, uri: str):
         assert self._session , "Session not available"
@@ -150,20 +154,27 @@ async def main():
 
 
         # List resource template
-        template = await _client.list_resource_template()
+        # template = await _client.list_resource_template()
         # for t in template: # printing each one
         #     print(t)
         # print(template) # list of ResourceTemplate
-        new_uri = template[0].uriTemplate.replace("{doc_id}","spec.txt")
-        template1 = await _client.read_resource(new_uri)
-        print(template1)
+        # new_uri = template[0].uriTemplate.replace("{doc_id}","spec.txt")
+        # template1 = await _client.read_resource(new_uri)
+        # print(template1)
         
         # uri = template[0].uriTemplate.replace("{doc_id}","deposition.md")
 
         # read_doc = await _client.read_resource(uri)
         # print("------read doc-----",read_doc)
-        
 
+        # List prompts
+        # prompts = await _client.list_prompts()
+        # print(prompts[0])
+        
+        # Get prompt
+        prompt = await _client.get_prompt("greet", {"name": "Suhaib"})
+        # print(prompt[0].content.text)
+        print(prompt)
 if __name__ == "__main__":
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
