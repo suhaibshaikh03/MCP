@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv, find_dotenv
 
 from agents import Agent, AsyncOpenAI, OpenAIChatCompletionsModel, Runner
-from agents.mcp import MCPServerStreamableHttp, MCPServerStreamableHttpParams
+from agents.mcp import MCPServerStreamableHttp, MCPServerStreamableHttpParams, create_static_tool_filter
 
 
 _: bool = load_dotenv(find_dotenv())
@@ -16,6 +16,7 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 
 async def main():
+    static_filter = create_static_tool_filter(allowed_tool_names=["special_greeting"],blocked_tool_names=["get_my_mood"])
     # 1. Configure parameters for the MCPServerStreamableHttp client
     # These parameters tell the SDK how to reach the MCP server.
     mcp_params = MCPServerStreamableHttpParams(url=MCP_SERVER_URL)
@@ -25,7 +26,11 @@ async def main():
     # This object represents our connection to the specific MCP server.
     # It's an async context manager, so we use `async with` for proper setup and teardown.
     # The `name` parameter is optional but useful for identifying the server in logs or multi-server setups.
-    async with MCPServerStreamableHttp(params=mcp_params, name="MySharedMCPServerClient",client_session_timeout_seconds=10, cache_tools_list=True) as mcp_server_client:
+    async with MCPServerStreamableHttp(params=mcp_params,
+                                       name="MySharedMCPServerClient",
+                                       client_session_timeout_seconds=10,
+                                       cache_tools_list=True,
+                                       tool_filter=static_filter) as mcp_server_client:
         # print(f"MCPServerStreamableHttp client '{mcp_server_client.name}' created and entered context.")
         # print("The SDK will use this client to interact with the MCP server.")
 
@@ -52,6 +57,8 @@ async def main():
             # print("\n\nRunning a simple agent interaction...")
             result = await Runner.run(assistant, "What is Sir Zia mood?")
             print(f"\n\n[AGENT RESPONSE]: {result.final_output}")
+            result2 = await Runner.run(assistant, "greet Suhaib")
+            print(f"\n\n[AGENT RESPONSE]: {result2.final_output}")
 
         except Exception as e:
             print(f"An error occurred during agent setup or tool listing: {e}")
